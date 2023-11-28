@@ -365,7 +365,6 @@ def main():
     global path, toemail
     banner = f"""
 \t\t{yellow}Laravel Extracktor{reset}
-\t\tThanks For Order!\n
 \t\t[CHANNEL] {red}@fiola_tools{reset}
 """
     try:
