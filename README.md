@@ -1,4 +1,4 @@
-# Env Extractor
+# Env Extractor - SMTP CRACKER & CHECKER
 Tools for extrack any information on laravel default .env or another path of .env and have many features.
 
 ## Features
