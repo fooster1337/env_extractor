@@ -371,19 +371,19 @@ def main():
 \t\t[CHANNEL] {red}@fiola_tools{reset}
 """
     try:
-        # create_folder()
-        # print(banner)
-        # try:
-        #     path = open('path.txt', 'r', encoding='utf8').read().splitlines()
-        # except FileNotFoundError:
-        #     path = ['/.env']
+        create_folder()
+        print(banner)
+        try:
+            path = open('path.txt', 'r', encoding='utf8').read().splitlines()
+        except FileNotFoundError:
+            path = ['/.env']
         try: email = open('email.txt', 'r', encoding='utf8').read(); toemail = re.search(r"[\w.+-]+@[\w-]+\.[\w.-]+", email).group(0)
         except FileNotFoundError: print(f"{red}ERROR{reset}: email.txt not found"); sys.exit()
-        # domain = list(dict.fromkeys(open(input("- Domain List : "), encoding='utf8').read().splitlines()))
-        # thread = int(input("- Thread : "))
-        # with ThreadPoolExecutor(max_workers=thread) as j:
-        #     j.map(env, domain)
-        env("http://34.222.216.205")
+        domain = list(dict.fromkeys(open(input("- Domain List : "), encoding='utf8').read().splitlines()))
+        thread = int(input("- Thread : "))
+        with ThreadPoolExecutor(max_workers=thread) as j:
+            j.map(env, domain)
+
 
     except FileNotFoundError: print("ERROR: File Not Found.")
     #except Exception as e: print(f"ERROR: {e}")
